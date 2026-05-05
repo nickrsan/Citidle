@@ -1,0 +1,298 @@
+import { ECONOMY, ZONE_TYPES, GRID } from './config.js';
+import { GameMap } from './grid.js';
+import { ResearchSystem } from './research.js';
+import { Renderer } from './renderer.js';
+
+// ── Game State ──
+const state = {
+    money: ECONOMY.startingMoney,
+    placingZone: null,          // null | 'residential' | 'commercial' | 'industrial'
+    lastOutput: { workers: 0, commerce: 0, production: 0, counts: {} },
+    incomePerTick: 0,
+    tickCount: 0,
+};
+
+// ── Systems ──
+const map = new GameMap();
+const research = new ResearchSystem();
+const canvas = document.getElementById('gameCanvas');
+const renderer = new Renderer(canvas);
+
+// ── DOM references ──
+const dom = {
+    money: document.getElementById('money-display'),
+    pop: document.getElementById('population-display'),
+    workers: document.getElementById('workers-display'),
+    commerce: document.getElementById('commerce-display'),
+    output: document.getElementById('output-display'),
+    tick: document.getElementById('tick-display'),
+    btnRes: document.getElementById('btn-residential'),
+    btnCom: document.getElementById('btn-commercial'),
+    btnInd: document.getElementById('btn-industrial'),
+    btnResearch: document.getElementById('btn-research'),
+    btnHelp: document.getElementById('btn-help'),
+    researchPanel: document.getElementById('research-panel'),
+    researchContent: document.getElementById('research-content'),
+    closeResearch: document.getElementById('btn-close-research'),
+    helpPanel: document.getElementById('help-panel'),
+    closeHelp: document.getElementById('btn-close-help'),
+    toastContainer: document.getElementById('toast-container'),
+};
+
+// ── Helpers ──
+function formatMoney(n) {
+    if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
+    if (n >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
+    if (n >= 1e3) return `$${(n / 1e3).toFixed(1)}K`;
+    return `$${Math.floor(n)}`;
+}
+
+function showToast(msg) {
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = msg;
+    dom.toastContainer.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+}
+
+function getTickMs() {
+    return Math.max(20, Math.floor(ECONOMY.baseTickMs * research.vars.tick_speed_multiplier));
+}
+
+function getPlacementCost(zoneType) {
+    return Math.floor(ZONE_TYPES[zoneType].placementCost * research.vars.placement_cost_multiplier);
+}
+
+// ── Zone Placement Buttons ──
+function updateZoneButtons() {
+    const vars = research.vars;
+    const zones = [
+        { btn: dom.btnRes, type: 'residential', unlocked: vars.unlock_residential },
+        { btn: dom.btnCom, type: 'commercial', unlocked: vars.unlock_commercial },
+        { btn: dom.btnInd, type: 'industrial', unlocked: vars.unlock_industrial },
+    ];
+    for (const { btn, type, unlocked } of zones) {
+        btn.classList.toggle('locked', !unlocked);
+        btn.classList.toggle('active', state.placingZone === type);
+        const cost = getPlacementCost(type);
+        btn.title = unlocked ? `Place ${type} zone (${formatMoney(cost)})` : 'Locked — research required';
+    }
+}
+
+function selectZone(type) {
+    const vars = research.vars;
+    const key = `unlock_${type}`;
+    if (!vars[key]) {
+        showToast(`🔒 Research "${type}" zoning first!`);
+        return;
+    }
+    state.placingZone = state.placingZone === type ? null : type;
+    canvas.classList.toggle('placing', !!state.placingZone);
+    updateZoneButtons();
+}
+
+dom.btnRes.addEventListener('click', () => selectZone('residential'));
+dom.btnCom.addEventListener('click', () => selectZone('commercial'));
+dom.btnInd.addEventListener('click', () => selectZone('industrial'));
+
+// ── Research Panel ──
+function renderResearchPanel() {
+    const grouped = research.getGrouped();
+    let html = '';
+    const categoryLabels = {
+        unlock: '🔓 Unlocks',
+        spread: '🌱 Spread',
+        density: '🏗 Density',
+        efficiency: '⚡ Efficiency',
+        economy: '💰 Economy',
+    };
+    for (const [cat, items] of Object.entries(grouped)) {
+        html += `<div style="grid-column:1/-1;margin-top:8px;font-size:13px;color:#888;">${categoryLabels[cat] || cat}</div>`;
+        for (const item of items) {
+            const maxed = item.currentLevel >= item.maxLevel;
+            const affordable = !maxed && item.available && state.money >= item.nextCost;
+            let cls = 'research-item';
+            if (maxed) cls += ' maxed';
+            else if (!item.available) cls += ' locked';
+            else if (affordable) cls += ' affordable';
+
+            html += `<div class="${cls}" data-id="${item.id}">
+                <div class="ri-name">${item.name}</div>
+                <div class="ri-desc">${item.description}</div>
+                <div class="ri-level">Level ${item.currentLevel} / ${item.maxLevel}</div>
+                ${!maxed ? `<div class="ri-cost">Cost: ${formatMoney(item.nextCost)}</div>` : '<div class="ri-cost" style="color:#8f8">MAX</div>'}
+                ${item.effects.map(e => `<div class="ri-effect">${e.variable} ${e.operation} ${e.value}</div>`).join('')}
+            </div>`;
+        }
+    }
+    dom.researchContent.innerHTML = html;
+
+    // Attach click handlers
+    dom.researchContent.querySelectorAll('.research-item:not(.maxed):not(.locked)').forEach(el => {
+        el.addEventListener('click', () => {
+            const id = el.dataset.id;
+            const result = research.purchase(id, state.money);
+            if (result.success) {
+                state.money -= result.cost;
+                showToast(`🔬 Researched ${research.getItem(id).name} (Lv ${result.newLevel})`);
+                renderResearchPanel();
+                updateZoneButtons();
+                updateHUD();
+            } else {
+                showToast('💸 Not enough money!');
+            }
+        });
+    });
+}
+
+dom.btnResearch.addEventListener('click', () => {
+    dom.researchPanel.classList.toggle('hidden');
+    if (!dom.researchPanel.classList.contains('hidden')) {
+        renderResearchPanel();
+    }
+});
+dom.closeResearch.addEventListener('click', () => dom.researchPanel.classList.add('hidden'));
+
+dom.btnHelp.addEventListener('click', () => dom.helpPanel.classList.toggle('hidden'));
+dom.closeHelp.addEventListener('click', () => dom.helpPanel.classList.add('hidden'));
+
+// ── Input: Mouse / Pan / Zoom ──
+let isDragging = false;
+let dragStartX = 0, dragStartY = 0;
+let camStartX = 0, camStartY = 0;
+
+canvas.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    camStartX = renderer.camX;
+    camStartY = renderer.camY;
+});
+
+canvas.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+        renderer.camX = camStartX + (e.clientX - dragStartX);
+        renderer.camY = camStartY + (e.clientY - dragStartY);
+    }
+    // Update hover grid position
+    const grid = renderer.screenToGrid(e.clientX, e.clientY);
+    renderer.hoverGridX = grid.x;
+    renderer.hoverGridY = grid.y;
+});
+
+canvas.addEventListener('mouseup', (e) => {
+    const dx = Math.abs(e.clientX - dragStartX);
+    const dy = Math.abs(e.clientY - dragStartY);
+    // If barely moved, treat as click
+    if (dx < 4 && dy < 4 && state.placingZone) {
+        const grid = renderer.screenToGrid(e.clientX, e.clientY);
+        tryPlaceZone(grid.x, grid.y);
+    }
+    isDragging = false;
+});
+
+canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const factor = e.deltaY > 0 ? 0.9 : 1.1;
+    renderer.zoom = Math.max(0.3, Math.min(4.0, renderer.zoom * factor));
+}, { passive: false });
+
+// Keyboard panning
+const keysDown = new Set();
+window.addEventListener('keydown', (e) => keysDown.add(e.key));
+window.addEventListener('keyup', (e) => keysDown.delete(e.key));
+
+function handleKeyPan() {
+    const speed = 6;
+    if (keysDown.has('ArrowLeft') || keysDown.has('a')) renderer.camX += speed;
+    if (keysDown.has('ArrowRight') || keysDown.has('d')) renderer.camX -= speed;
+    if (keysDown.has('ArrowUp') || keysDown.has('w')) renderer.camY += speed;
+    if (keysDown.has('ArrowDown') || keysDown.has('s')) renderer.camY -= speed;
+}
+
+// ── Zone Placement ──
+function tryPlaceZone(gx, gy) {
+    if (!state.placingZone) return;
+    const cost = getPlacementCost(state.placingZone);
+    if (state.money < cost) {
+        showToast('💸 Not enough money!');
+        return;
+    }
+    if (map.placeZone(gx, gy, state.placingZone)) {
+        state.money -= cost;
+        showToast(`✅ Placed ${state.placingZone} zone at (${gx}, ${gy})`);
+        updateHUD();
+    } else {
+        showToast('❌ Cannot place there.');
+    }
+}
+
+// ── HUD Update ──
+function updateHUD() {
+    const o = state.lastOutput;
+    const tickMs = getTickMs();
+    const ticksPerSec = 1000 / tickMs;
+    const incomePerSec = state.incomePerTick * ticksPerSec;
+
+    dom.money.textContent = `💰 ${formatMoney(state.money)}`;
+    dom.pop.textContent = `🏠 Pop: ${o.workers}`;
+    dom.workers.textContent = `🏭 Prod: ${o.production}`;
+    dom.commerce.textContent = `🏪 Comm: ${o.commerce}`;
+    dom.output.textContent = `📊 Output: ${formatMoney(incomePerSec)}/s`;
+    dom.tick.textContent = `⏱ Tick: ${tickMs}ms`;
+}
+
+// ── Economy Tick ──
+function economyTick() {
+    const vars = research.vars;
+
+    // Spread zones
+    map.tickSpread(vars.spread_multiplier);
+
+    // Densify
+    map.tickDensify();
+
+    // Compute output
+    const output = map.computeOutput(vars);
+    state.lastOutput = output;
+
+    // Income = min(workers, commerce, production) × income multiplier
+    const minOutput = Math.min(output.workers, output.commerce, output.production);
+    const income = minOutput * ECONOMY.incomePerOutput * vars.income_multiplier;
+    state.incomePerTick = income;
+    state.money += income;
+    state.tickCount++;
+}
+
+// ── Game Loop ──
+let lastTickTime = 0;
+let lastRenderTime = 0;
+
+function gameLoop(timestamp) {
+    requestAnimationFrame(gameLoop);
+
+    // Keyboard panning
+    handleKeyPan();
+
+    // Economy tick at configured interval
+    const tickMs = getTickMs();
+    if (timestamp - lastTickTime >= tickMs) {
+        economyTick();
+        lastTickTime = timestamp;
+        // Update HUD every few ticks (not every frame)
+        if (state.tickCount % 5 === 0) {
+            updateHUD();
+        }
+    }
+
+    // Render at ~60fps
+    if (timestamp - lastRenderTime >= 16) {
+        renderer.render(map, state.placingZone);
+        lastRenderTime = timestamp;
+    }
+}
+
+// ── Start ──
+updateZoneButtons();
+updateHUD();
+requestAnimationFrame(gameLoop);

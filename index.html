@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citidle - Idle City Builder</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- HUD Overlay -->
+    <div id="hud">
+        <div id="hud-top">
+            <div id="money-display">💰 $0</div>
+            <div id="population-display">🏠 Pop: 0</div>
+            <div id="workers-display">🏭 Workers: 0</div>
+            <div id="commerce-display">🏪 Commerce: 0</div>
+            <div id="output-display">📊 Output: $0/s</div>
+            <div id="tick-display">⏱ Tick: 100ms</div>
+        </div>
+        <div id="hud-bottom">
+            <button id="btn-residential" class="zone-btn" title="Place Residential Zone">🏠 Residential</button>
+            <button id="btn-commercial" class="zone-btn" title="Place Commercial Zone">🏪 Commercial</button>
+            <button id="btn-industrial" class="zone-btn" title="Place Industrial Zone">🏭 Industrial</button>
+            <button id="btn-research" class="hud-btn" title="Open Research Tree">🔬 Research</button>
+            <button id="btn-help" class="hud-btn" title="Help">❓ Help</button>
+        </div>
+    </div>
+
+    <!-- Research Panel -->
+    <div id="research-panel" class="panel hidden">
+        <div class="panel-header">
+            <h2>🔬 Research Tree</h2>
+            <button id="btn-close-research" class="close-btn">✕</button>
+        </div>
+        <div id="research-content"></div>
+    </div>
+
+    <!-- Help Panel -->
+    <div id="help-panel" class="panel hidden">
+        <div class="panel-header">
+            <h2>❓ Help</h2>
+            <button id="btn-close-help" class="close-btn">✕</button>
+        </div>
+        <div class="panel-body">
+            <p><strong>Citidle</strong> — an ambient idle city builder.</p>
+            <ul>
+                <li>🏠🏪🏭 <strong>Place zones</strong> on the grid. They spread over time!</li>
+                <li>📐 <strong>Pan</strong> by dragging with the mouse or arrow keys.</li>
+                <li>🔍 <strong>Zoom</strong> with the scroll wheel.</li>
+                <li>🔬 <strong>Research</strong> unlocks new zones and upgrades.</li>
+                <li>💰 <strong>Income</strong> = min(Workers, Commerce, Production).</li>
+                <li>Zones deepen in color and grow taller as they densify.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div id="toast-container"></div>
+
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>

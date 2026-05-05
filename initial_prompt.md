@@ -1,0 +1,15 @@
+I want to make a "idle" game using Javascript and HTML Canvas (either directly or in an appropriate framework or library) - I don't want progression to be too fast or too slow - it should encourage just letting the game run in the background for a while. It will be a bit like an ambient game, a screensaver, and an idle game. It is inspired by older city builders where you simply place zoning and should have a grid layout. Instead of placing zoning all over the grid, various research lets you place a single location of zoning, and over time, that zoning grows at a rate (also configurable with research) and spreads to the surrounding area. We can start with Conway's Game of Life as the initial ruleset for spreading to a neighboring cell, but zones shouldn't disappear, at least not initially. Instead, they should have some low probability of spreading to a neighboring cell (including diagonals), and then, also some smaller probability to transform zoning types - so a commercial zone, for example, might start at 95% chance that it spreads to become a commercial zone, but it might have  3% chance that it spreads to a residential and a 2% chance that it spreads to an industrial type.
+
+Each type of zoning should have research that governs its efficiency of production, and we need enough residential units near commercial and industrial to allow people to work and enough commercial near industrial to sell goods.
+
+Research should initially function as a tree, but with multiple levels for each research item. I'd like to be able to define the research items and which variables they modify and how via some kind of JSON configuration or similar.
+
+Visually, the graphics can be simple, but people should be able to watch zoning spread and pan around the map to see it happen. I'd like the timestep (or tick rate) for economy calculations to be about 100ms apart initially, but with the ability for research to speed it up.
+
+Other initial research items include densifying existing development (leading to more households, industrial jobs, and  commercial properties), other efficiencies for each of those, cost reductions for placements, and more rapid rates of spread.
+
+The rendering of the zones can be simple - they can be a grid with each cell and then as a zone produces more or houses more people, it can deepen in color and grow in the Z axis. I'd prefer an isometric view for all of this, but 3D or Voxel would be OK.
+
+The research tree should also be representable graphically and viewable with a button in the main UI, along with how much money the user has earned. Start with a simple formulation of production from industrial zones, sales from commercial zones, and workers from residential zones, where the minimum of those three determines output.
+
+Is that enough for you to start building this code base?
