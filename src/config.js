@@ -37,6 +37,10 @@ export const GRID = {
     width: 100,
     height: 100,
     cellSize: 32,           // logical pixel size of one cell
+    initialUsableSize: 20,  // initial usable area (centered square)
+    tileExpansionAmount: 5,  // cells to expand in each direction per purchase
+    tileBaseCost: 500,
+    tileCostScale: 1.8,
 };
 
 // ── Isometric settings ──
@@ -50,12 +54,19 @@ export const ISO = {
 export const ECONOMY = {
     baseTickMs: 100,         // starting tick interval
     incomePerOutput: 1,      // $ per unit of min(workers, commerce, production)
-    startingMoney: 100,
+    startingMoney: 500,
 };
 
 // ── Spread mechanics ──
 export const SPREAD = {
-    baseChance: 0.008,       // base probability per neighbor per tick that a zone spreads
+    baseChance: 0.0000008,       // base probability per neighbor per tick that a zone spreads
+};
+
+// ── Animation settings ──
+export const ANIMATIONS = {
+    commercialShipChance: 0.005,  // chance per commercial cell per tick to show $ animation
+    animationDuration: 1200,      // ms for floating animations
+    animationRiseSpeed: 30,       // pixels per second the animation floats up
 };
 
 // ── Research tree (JSON-style config) ──
@@ -110,6 +121,18 @@ export const RESEARCH_TREE = [
         effects: [{ variable: 'spread_multiplier', operation: 'multiply', value: 1.25 }],
         category: 'spread',
     },
+    {
+        id: 'spread_rate2',
+        name: 'Exurban Car Culture',
+        description: 'Increase zone spread chance by 10x per level.',
+        maxLevel: 3,
+        baseCost: 1500,
+        costScale: 1.8,
+        requires: { unlock_residential: 1 },
+        effects: [{ variable: 'spread_multiplier', operation: 'multiply', value: 10 }],
+        category: 'spread',
+    },
+
 
     // ── Density ──
     {
@@ -124,6 +147,18 @@ export const RESEARCH_TREE = [
         category: 'density',
     },
     {
+        id: 'neighbor_densify_residential',
+        name: 'High Rise Housing',
+        description: 'Residential cells are 25% more likely to densify per neighboring residential cell per level.',
+        maxLevel: 5,
+        baseCost: 120,
+        costScale: 1.8,
+        requires: { density_residential: 2 },
+        effects: [{ variable: 'neighbor_densify_residential', operation: 'add', value: 0.25 }],
+        category: 'density',
+    },
+
+    {
         id: 'density_commercial',
         name: 'Commercial Density',
         description: 'Each commercial cell produces +1 commerce per level.',
@@ -135,6 +170,17 @@ export const RESEARCH_TREE = [
         category: 'density',
     },
     {
+        id: 'neighbor_densify_commercial',
+        name: 'Commercial Clusters',
+        description: 'Commercial cells are 25% more likely to densify per neighboring commercial cell per level.',
+        maxLevel: 5,
+        baseCost: 150,
+        costScale: 1.8,
+        requires: { density_commercial: 2 },
+        effects: [{ variable: 'neighbor_densify_commercial', operation: 'add', value: 0.25 }],
+        category: 'density',
+    },
+    {
         id: 'density_industrial',
         name: 'Industrial Density',
         description: 'Each industrial cell produces +1 production per level.',
@@ -143,6 +189,17 @@ export const RESEARCH_TREE = [
         costScale: 1.6,
         requires: { unlock_industrial: 1 },
         effects: [{ variable: 'density_industrial', operation: 'add', value: 1 }],
+        category: 'density',
+    },
+    {
+        id: 'neighbor_densify_industrial',
+        name: 'Industrial Parks',
+        description: 'Industrial cells are 25% more likely to densify per neighboring industrial cell per level.',
+        maxLevel: 5,
+        baseCost: 180,
+        costScale: 1.8,
+        requires: { density_industrial: 2 },
+        effects: [{ variable: 'neighbor_densify_industrial', operation: 'add', value: 0.25 }],
         category: 'density',
     },
 
@@ -230,6 +287,9 @@ export const DEFAULT_VARS = {
     density_residential: 0,
     density_commercial: 0,
     density_industrial: 0,
+    neighbor_densify_residential: 0,
+    neighbor_densify_commercial: 0,
+    neighbor_densify_industrial: 0,
     efficiency_residential: 1.0,
     efficiency_commercial: 1.0,
     efficiency_industrial: 1.0,

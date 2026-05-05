@@ -126,6 +126,7 @@ body {
     top: 0;
     background: rgba(20, 20, 45, 0.98);
     border-radius: 12px 12px 0 0;
+    z-index: 2;
 }
 
 .panel-header h2 {
@@ -160,12 +161,35 @@ body {
     background: rgba(255, 255, 255, 0.1);
 }
 
+/* Research tree — SVG overlay for prerequisite lines */
+#research-panel {
+    position: fixed;
+}
+
+#research-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: visible;
+}
+
 /* Research tree items */
 #research-content {
     padding: 20px;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.research-category-label {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #888;
 }
 
 .research-item {

@@ -29,6 +29,37 @@ export class GameMap {
         for (let i = 0; i < width * height; i++) {
             this.cells.push(new Cell());
         }
+
+        // Usable bounds (centered square initially)
+        const half = Math.floor(GRID.initialUsableSize / 2);
+        const cx = Math.floor(width / 2);
+        const cy = Math.floor(height / 2);
+        this.usableMinX = cx - half;
+        this.usableMinY = cy - half;
+        this.usableMaxX = cx + half - 1;
+        this.usableMaxY = cy + half - 1;
+        this.tilePurchaseCount = 0;
+    }
+
+    /** Check if a cell is within the usable (unlocked) area. */
+    isUsable(x, y) {
+        return x >= this.usableMinX && x <= this.usableMaxX &&
+               y >= this.usableMinY && y <= this.usableMaxY;
+    }
+
+    /** Expand the usable area by the configured amount in each direction. */
+    expandUsableArea() {
+        const amt = GRID.tileExpansionAmount;
+        this.usableMinX = Math.max(0, this.usableMinX - amt);
+        this.usableMinY = Math.max(0, this.usableMinY - amt);
+        this.usableMaxX = Math.min(this.width - 1, this.usableMaxX + amt);
+        this.usableMaxY = Math.min(this.height - 1, this.usableMaxY + amt);
+        this.tilePurchaseCount++;
+    }
+
+    /** Get the cost for the next tile expansion. */
+    getTileExpansionCost() {
+        return Math.floor(GRID.tileBaseCost * Math.pow(GRID.tileCostScale, this.tilePurchaseCount));
     }
 
     /** Get cell at (x, y). Returns null if out of bounds. */
@@ -41,10 +72,27 @@ export class GameMap {
     placeZone(x, y, zoneType) {
         const cell = this.getCell(x, y);
         if (!cell || cell.zone) return false;
+        if (!this.isUsable(x, y)) return false;
         cell.zone = zoneType;
         cell.density = 1;
         cell.age = 0;
         return true;
+    }
+
+    /**
+     * Count same-type neighbors for a cell.
+     * @param {number} x
+     * @param {number} y
+     * @param {string} zoneType
+     * @returns {number}
+     */
+    countSameNeighbors(x, y, zoneType) {
+        let count = 0;
+        for (const [dx, dy] of NEIGHBORS) {
+            const neighbor = this.getCell(x + dx, y + dy);
+            if (neighbor && neighbor.zone === zoneType) count++;
+        }
+        return count;
     }
 
     /**
@@ -55,8 +103,8 @@ export class GameMap {
         const spreadChance = SPREAD.baseChance * spreadMultiplier;
         const newZones = []; // collect changes to apply atomically
 
-        for (let y = 0; y < this.height; y++) {
-            for (let x = 0; x < this.width; x++) {
+        for (let y = this.usableMinY; y <= this.usableMaxY; y++) {
+            for (let x = this.usableMinX; x <= this.usableMaxX; x++) {
                 const cell = this.getCell(x, y);
                 if (!cell.zone) continue;
 
@@ -66,6 +114,7 @@ export class GameMap {
                 for (const [dx, dy] of NEIGHBORS) {
                     const nx = x + dx;
                     const ny = y + dy;
+                    if (!this.isUsable(nx, ny)) continue;
                     const neighbor = this.getCell(nx, ny);
                     if (!neighbor || neighbor.zone) continue;
 
@@ -147,17 +196,37 @@ export class GameMap {
 
     /**
      * Slowly densify existing zones each tick (small chance per cell).
+     * Neighbor bonus: if research provides neighbor_densify_<type>, each same-type
+     * neighbor increases the densification chance by that fraction.
+     * @param {object} vars — current research variables
+     * @returns {Array<{x: number, y: number, zone: string}>} — cells that densified this tick
      */
-    tickDensify() {
-        const densifyChance = 0.001; // per cell per tick
+    tickDensify(vars = {}) {
+        const baseDensifyChance = 0.001; // per cell per tick
         const maxDensity = 10;
-        for (let i = 0; i < this.cells.length; i++) {
-            const cell = this.cells[i];
-            if (!cell.zone) continue;
-            if (cell.density >= maxDensity) continue;
-            if (Math.random() < densifyChance) {
-                cell.density += 1;
+        const densified = [];
+
+        for (let y = this.usableMinY; y <= this.usableMaxY; y++) {
+            for (let x = this.usableMinX; x <= this.usableMaxX; x++) {
+                const cell = this.getCell(x, y);
+                if (!cell.zone) continue;
+                if (cell.density >= maxDensity) continue;
+
+                // Calculate neighbor bonus
+                const neighborBonus = vars[`neighbor_densify_${cell.zone}`] || 0;
+                let chance = baseDensifyChance;
+                if (neighborBonus > 0) {
+                    const sameNeighbors = this.countSameNeighbors(x, y, cell.zone);
+                    chance *= (1 + neighborBonus * sameNeighbors);
+                }
+
+                if (Math.random() < chance) {
+                    cell.density += 1;
+                    densified.push({ x, y, zone: cell.zone });
+                }
             }
         }
+
+        return densified;
     }
 }

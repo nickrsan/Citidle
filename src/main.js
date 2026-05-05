@@ -1,4 +1,4 @@
-import { ECONOMY, ZONE_TYPES, GRID } from './config.js';
+import { ECONOMY, ZONE_TYPES, GRID, ANIMATIONS, RESEARCH_TREE } from './config.js';
 import { GameMap } from './grid.js';
 import { ResearchSystem } from './research.js';
 import { Renderer } from './renderer.js';
@@ -18,6 +18,12 @@ const research = new ResearchSystem();
 const canvas = document.getElementById('gameCanvas');
 const renderer = new Renderer(canvas);
 
+// Center camera on the usable area
+const centerX = (map.usableMinX + map.usableMaxX) / 2;
+const centerY = (map.usableMinY + map.usableMaxY) / 2;
+renderer.camY = (renderer.screenH / 2) - (renderer.screenH / 4) - (centerX + centerY) * (16 / 2);
+// Since centerX == centerY, camX remains 0
+
 // ── DOM references ──
 const dom = {
     money: document.getElementById('money-display'),
@@ -29,10 +35,12 @@ const dom = {
     btnRes: document.getElementById('btn-residential'),
     btnCom: document.getElementById('btn-commercial'),
     btnInd: document.getElementById('btn-industrial'),
+    btnTiles: document.getElementById('btn-tiles'),
     btnResearch: document.getElementById('btn-research'),
     btnHelp: document.getElementById('btn-help'),
     researchPanel: document.getElementById('research-panel'),
     researchContent: document.getElementById('research-content'),
+    researchSvg: document.getElementById('research-svg'),
     closeResearch: document.getElementById('btn-close-research'),
     helpPanel: document.getElementById('help-panel'),
     closeHelp: document.getElementById('btn-close-help'),
@@ -77,6 +85,14 @@ function updateZoneButtons() {
         const cost = getPlacementCost(type);
         btn.title = unlocked ? `Place ${type} zone (${formatMoney(cost)})` : 'Locked — research required';
     }
+    updateTileButton();
+}
+
+function updateTileButton() {
+    const cost = map.getTileExpansionCost();
+    const size = (map.usableMaxX - map.usableMinX + 1);
+    dom.btnTiles.textContent = `🗺 Expand (${formatMoney(cost)})`;
+    dom.btnTiles.title = `Expand usable area (current: ${size}×${size})`;
 }
 
 function selectZone(type) {
@@ -95,6 +111,21 @@ dom.btnRes.addEventListener('click', () => selectZone('residential'));
 dom.btnCom.addEventListener('click', () => selectZone('commercial'));
 dom.btnInd.addEventListener('click', () => selectZone('industrial'));
 
+// ── Tile Purchase ──
+dom.btnTiles.addEventListener('click', () => {
+    const cost = map.getTileExpansionCost();
+    if (state.money < cost) {
+        showToast('💸 Not enough money to expand!');
+        return;
+    }
+    state.money -= cost;
+    map.expandUsableArea();
+    const size = (map.usableMaxX - map.usableMinX + 1);
+    showToast(`🗺 Expanded to ${size}×${size} tiles!`);
+    updateTileButton();
+    updateHUD();
+});
+
 // ── Research Panel ──
 function renderResearchPanel() {
     const grouped = research.getGrouped();
@@ -107,7 +138,7 @@ function renderResearchPanel() {
         economy: '💰 Economy',
     };
     for (const [cat, items] of Object.entries(grouped)) {
-        html += `<div style="grid-column:1/-1;margin-top:8px;font-size:13px;color:#888;">${categoryLabels[cat] || cat}</div>`;
+        html += `<div class="research-category-label">${categoryLabels[cat] || cat}</div>`;
         for (const item of items) {
             const maxed = item.currentLevel >= item.maxLevel;
             const affordable = !maxed && item.available && state.money >= item.nextCost;
@@ -143,6 +174,68 @@ function renderResearchPanel() {
             }
         });
     });
+
+    // Draw prerequisite lines after DOM settles
+    // requestAnimationFrame(() => drawResearchLines());
+}
+
+function drawResearchLines() {
+    const svg = dom.researchSvg;
+    const container = dom.researchPanel;
+    if (!svg || !container) return;
+
+    // Clear existing lines
+    svg.innerHTML = '';
+
+    // Get container bounds for coordinate offset
+    const containerRect = container.getBoundingClientRect();
+
+    // Build map of item elements by id
+    const itemEls = {};
+    dom.researchContent.querySelectorAll('.research-item').forEach(el => {
+        itemEls[el.dataset.id] = el;
+    });
+
+    // Size SVG to match scrollable content
+    const scrollW = container.scrollWidth;
+    const scrollH = container.scrollHeight;
+    svg.setAttribute('width', scrollW);
+    svg.setAttribute('height', scrollH);
+    svg.style.width = scrollW + 'px';
+    svg.style.height = scrollH + 'px';
+
+    // Draw lines for each research item to its prerequisites
+    for (const item of RESEARCH_TREE) {
+        const toEl = itemEls[item.id];
+        if (!toEl) continue;
+
+        for (const reqId of Object.keys(item.requires)) {
+            const fromEl = itemEls[reqId];
+            if (!fromEl) continue;
+
+            const fromRect = fromEl.getBoundingClientRect();
+            const toRect = toEl.getBoundingClientRect();
+
+            // Compute positions relative to the scroll container
+            const scrollTop = container.scrollTop;
+            const scrollLeft = container.scrollLeft;
+
+            const x1 = fromRect.left - containerRect.left + scrollLeft + fromRect.width / 2;
+            const y1 = fromRect.top - containerRect.top + scrollTop + fromRect.height / 2;
+            const x2 = toRect.left - containerRect.left + scrollLeft + toRect.width / 2;
+            const y2 = toRect.top - containerRect.top + scrollTop + toRect.height / 2;
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('stroke', 'rgba(100, 200, 255, 0.4)');
+            line.setAttribute('stroke-width', '2');
+            line.setAttribute('stroke-dasharray', '4,4');
+            svg.appendChild(line);
+        }
+    }
 }
 
 dom.btnResearch.addEventListener('click', () => {
@@ -213,6 +306,10 @@ function handleKeyPan() {
 // ── Zone Placement ──
 function tryPlaceZone(gx, gy) {
     if (!state.placingZone) return;
+    if (!map.isUsable(gx, gy)) {
+        showToast('🔒 This area is locked — purchase more tiles!');
+        return;
+    }
     const cost = getPlacementCost(state.placingZone);
     if (state.money < cost) {
         showToast('💸 Not enough money!');
@@ -249,8 +346,25 @@ function economyTick() {
     // Spread zones
     map.tickSpread(vars.spread_multiplier);
 
-    // Densify
-    map.tickDensify();
+    // Densify — returns list of cells that densified
+    const densified = map.tickDensify(vars);
+
+    // Add densification animations
+    for (const { x, y, zone } of densified) {
+        renderer.addDensifyAnim(x, y, zone);
+    }
+
+    // Spawn commercial $ animations
+    for (let y = map.usableMinY; y <= map.usableMaxY; y++) {
+        for (let x = map.usableMinX; x <= map.usableMaxX; x++) {
+            const cell = map.getCell(x, y);
+            if (cell && cell.zone === 'commercial') {
+                if (Math.random() < ANIMATIONS.commercialShipChance) {
+                    renderer.addCommercialAnim(x, y);
+                }
+            }
+        }
+    }
 
     // Compute output
     const output = map.computeOutput(vars);
