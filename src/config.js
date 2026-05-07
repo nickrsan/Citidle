@@ -127,7 +127,7 @@ export const RESEARCH_TREE = [
         description: 'Increase zone spread chance by 10x per level.',
         maxLevel: 3,
         baseCost: 1500,
-        costScale: 1.8,
+        costScale: 100,
         requires: { unlock_residential: 1 },
         effects: [{ variable: 'spread_multiplier', operation: 'multiply', value: 10 }],
         category: 'spread',
@@ -241,7 +241,7 @@ export const RESEARCH_TREE = [
     // ── Cost Reduction ──
     {
         id: 'cost_reduction',
-        name: 'Budget Planning',
+        name: 'Community Meeting Facilitation',
         description: 'Reduce zone placement cost by 10% per level.',
         maxLevel: 5,
         baseCost: 120,
@@ -254,7 +254,7 @@ export const RESEARCH_TREE = [
     // ── Tick Speed ──
     {
         id: 'tick_speed',
-        name: 'Faster Processing',
+        name: 'Permit Streamlining',
         description: 'Reduce tick interval by 8% per level (faster economy).',
         maxLevel: 10,
         baseCost: 300,
@@ -280,7 +280,7 @@ export const RESEARCH_TREE = [
 
 // Default research variable values (before any research is applied)
 export const DEFAULT_VARS = {
-    unlock_residential: true,   // residential starts unlocked
+    unlock_residential: false,
     unlock_commercial: false,
     unlock_industrial: false,
     spread_multiplier: 1.0,
