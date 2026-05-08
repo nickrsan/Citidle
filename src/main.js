@@ -1,4 +1,4 @@
-import { ECONOMY, ZONE_TYPES, GRID, ANIMATIONS, RESEARCH_TREE } from './config.js';
+import { ISO, ECONOMY, ZONE_TYPES, GRID, ANIMATIONS, RESEARCH_TREE } from './config.js';
 import { GameMap } from './grid.js';
 import { ResearchSystem } from './research.js';
 import { Renderer } from './renderer.js';
@@ -18,11 +18,28 @@ const research = new ResearchSystem();
 const canvas = document.getElementById('gameCanvas');
 const renderer = new Renderer(canvas);
 
-// Center camera on the usable area
-const centerX = (map.usableMinX + map.usableMaxX) / 2;
-const centerY = (map.usableMinY + map.usableMaxY) / 2;
-renderer.camY = (renderer.screenH / 2) - (renderer.screenH / 4) - (centerX + centerY) * (16 / 2);
-// Since centerX == centerY, camX remains 0
+function centerCamera() {
+    const centerX = (map.usableMinX + map.usableMaxX + 1) / 2;
+    const centerY = (map.usableMinY + map.usableMaxY + 1) / 2;
+    
+    // We want grid (centerX, centerY) to be at screen center (screenW/2, screenH/2)
+    // screenX = (gx - gy) * (tw / 2) + camX + screenW / 2
+    // screenY = (gx + gy) * (th / 2) + camY + screenH / 4
+    
+    // Setting screenX = screenW / 2:
+    // 0 = (centerX - centerY) * (tw / 2) + camX
+    // camX = -(centerX - centerY) * (tw / 2)
+    
+    // Setting screenY = screenH / 2:
+    // screenH / 2 = (centerX + centerY) * (th / 2) + camY + screenH / 4
+    // camY = screenH / 4 - (centerX + centerY) * (th / 2)
+    
+    const tw = ISO.tileWidth * renderer.zoom;
+    const th = ISO.tileHeight * renderer.zoom;
+    
+    renderer.camX = -(centerX - centerY) * (tw / 2);
+    renderer.camY = (renderer.screenH / 4) - (centerX + centerY) * (th / 2);
+}
 
 // ── DOM references ──
 const dom = {
@@ -37,6 +54,7 @@ const dom = {
     btnInd: document.getElementById('btn-industrial'),
     btnTiles: document.getElementById('btn-tiles'),
     btnResearch: document.getElementById('btn-research'),
+    btnZoomReset: document.getElementById('btn-zoom-reset'),
     btnHelp: document.getElementById('btn-help'),
     researchPanel: document.getElementById('research-panel'),
     researchContent: document.getElementById('research-content'),
@@ -295,6 +313,11 @@ dom.btnResearch.addEventListener('click', () => {
 });
 dom.closeResearch.addEventListener('click', () => dom.researchPanel.classList.add('hidden'));
 
+dom.btnZoomReset.addEventListener('click', () => {
+    renderer.zoom = 1.0;
+    centerCamera();
+});
+
 dom.btnHelp.addEventListener('click', () => dom.helpPanel.classList.toggle('hidden'));
 dom.closeHelp.addEventListener('click', () => dom.helpPanel.classList.add('hidden'));
 
@@ -335,8 +358,28 @@ canvas.addEventListener('mouseup', (e) => {
 
 canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
+    const oldZoom = renderer.zoom;
     const factor = e.deltaY > 0 ? 0.9 : 1.1;
     renderer.zoom = Math.max(0.3, Math.min(4.0, renderer.zoom * factor));
+    
+    const actualFactor = renderer.zoom / oldZoom;
+    
+    // Zoom towards mouse:
+    // Adjust camX/camY so that the grid point under the mouse stays there.
+    // camX_new = px - screenW/2 - (px - screenW/2 - camX_old) * actualFactor
+    
+    const px = e.clientX;
+    const py = e.clientY;
+    const offX = px - renderer.screenW / 2;
+    const offY = py - renderer.screenH / 4;
+    
+    renderer.camX = offX - (offX - renderer.camX) * actualFactor;
+    renderer.camY = offY - (offY - renderer.camY) * actualFactor;
+    
+    // Update hover grid position after zoom
+    const grid = renderer.screenToGrid(px, py);
+    renderer.hoverGridX = grid.x;
+    renderer.hoverGridY = grid.y;
 }, { passive: false });
 
 // Keyboard panning
@@ -458,6 +501,7 @@ function gameLoop(timestamp) {
 }
 
 // ── Start ──
+centerCamera();
 updateZoneButtons();
 updateHUD();
 requestAnimationFrame(gameLoop);

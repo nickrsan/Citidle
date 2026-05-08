@@ -29,13 +29,19 @@ The `GameMap` class manages the state of the grid.
 - `calculateEconomy(gameState)`: Implements the "minimum of three" production logic.
 
 ### 3. Rendering (`src/renderer.js`)
-The `Renderer` class handles the isometric projection.
-- `gridToScreen(q, r)`: Converts grid coordinates to screen space.
-- `screenToGrid(x, y)`: Converts screen coordinates back to grid coordinates.
-- `draw(gameState)`: The main draw loop, optimized with frustum culling.
+The `Renderer` class handles the isometric projection and camera state.
+- `gridToScreen(gx, gy)`: Converts grid coordinates to screen space.
+- `screenToGrid(px, py)`: Converts screen coordinates back to grid coordinates.
+- `render(map, placingZone)`: The main draw loop, optimized with frustum culling.
 - `FloatingAnim`: A simple particle system for floating icons.
 
-### 4. Research (`src/research.js`)
+### 4. Input & Camera (`src/main.js`)
+Handles user input and synchronization between the simulation and UI.
+- **Camera State**: `camX`, `camY`, and `zoom` are managed within the `Renderer` instance.
+- **Zooming**: Implemented via the `wheel` event. It uses a "zoom-to-cursor" algorithm that adjusts `camX` and `camY` to keep the grid point under the mouse stable during scale changes.
+- **Camera Centering**: The `centerCamera()` function calculates the geometric center of the current usable map area and aligns it with the screen center.
+
+### 5. Research (`src/research.js`)
 The `ResearchManager` handles buying upgrades and applying their effects.
 - `buy(id, gameState)`: Validates costs and prerequisites before applying effects.
 - `applyEffect(effect, gameState)`: Dynamically modifies game variables based on research definitions (`set`, `add`, `multiply`).

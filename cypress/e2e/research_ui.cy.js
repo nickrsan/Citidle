@@ -23,15 +23,12 @@ describe('Research UI Improvements', () => {
 
   it('fades out items when money is insufficient', () => {
     // Initial money 500.
-    // Spend it all on expanding the grid (costs 500).
-    cy.get('#btn-close-research').click();
-    cy.get('#btn-tiles').click();
+    // Spend it all on "Urban Sprawl" research (costs 500).
+    cy.contains('.ri-name', 'Urban Sprawl').parents('.research-item').click();
     cy.get('#money-display').should('contain', '💰 $0');
     
-    cy.get('#btn-research').click();
-    
-    // Urban Sprawl cost 500, should be unaffordable when money is 0
-    cy.contains('.ri-name', 'Urban Sprawl')
+    // Everything else should be unaffordable when money is 0
+    cy.contains('.ri-name', 'Residential Density')
       .parents('.research-item')
       .should('have.class', 'unaffordable');
   });

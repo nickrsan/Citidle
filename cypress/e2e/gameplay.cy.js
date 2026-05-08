@@ -44,21 +44,8 @@ describe('Citidle E2E Gameplay', () => {
   });
 
   it('can expand the grid', () => {
-    // Initial expand cost is 500
-    cy.get('#btn-tiles').should('contain', '🗺 Expand ($500)');
-    
-    // Place something to spend money or just expand immediately if we have enough
-    // We have 500 at start.
-    cy.get('#btn-tiles').click();
-    
-    // Should show toast
-    cy.get('.toast').should('contain', '🗺 Expanded to');
-    
-    // Money should be 0
-    cy.get('#money-display').should('contain', '💰 $0');
-    
-    // Button should now show next cost (500 * 1.8 = 900)
-    cy.get('#btn-tiles').should('contain', '($900)');
+    // Initial expand cost is 1.00M
+    cy.get('#btn-tiles').should('contain', '🗺 Expand ($1.00M)');
   });
 
   it('can toggle the help panel', () => {

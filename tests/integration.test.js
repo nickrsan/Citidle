@@ -33,16 +33,15 @@ describe('Integration / UI Interaction consequences', () => {
 
     test('Expanding grid allows placement in previously locked tiles', () => {
         const map = new GameMap();
+        // Initially, (0,0) is far outside the usable area (which is around 250,250)
         const lockedX = 0, lockedY = 0;
         
         assert.strictEqual(map.isUsable(lockedX, lockedY), false, 'Corner should be locked initially');
         assert.strictEqual(map.placeZone(lockedX, lockedY, 'residential'), false, 'Should not be able to place in locked zone');
         
-        // "UI Interaction": Expand grid multiple times to reach (0,0)
-        // Each expansion adds 5 tiles in each direction.
-        // Center is (50,50), initial size is 20 (so 40 to 59).
-        // To reach 0, we need to cover 40 tiles, which is 8 expansions.
-        for (let i = 0; i < 10; i++) {
+        // "UI Interaction": Expand grid enough times to reach (0,0)
+        // From 245 to 0 with 5 per expansion = 49 expansions.
+        for (let i = 0; i < 50; i++) {
             map.expandUsableArea();
         }
         
@@ -72,17 +71,26 @@ describe('Integration / UI Interaction consequences', () => {
         const map = new GameMap();
         
         // Place 10 residential, 5 commercial, 2 industrial
-        const cx = Math.floor(map.width / 2);
-        const cy = Math.floor(map.height / 2);
-        for (let i = 0; i < 10; i++) map.placeZone(cx + i, cy, 'residential');
-        for (let i = 0; i < 5; i++) map.placeZone(cx, cy + i + 1, 'commercial');
-        for (let i = 0; i < 2; i++) map.placeZone(cx + 1, cy + i + 1, 'industrial');
+        // Ensure they are within the usable area (initially 10x10 around 250,250)
+        const cx = map.usableMinX;
+        const cy = map.usableMinY;
+        
+        for (let i = 0; i < 10; i++) {
+            // Distribute across the 10x10 area to avoid going out of bounds
+            map.placeZone(cx + (i % 5), cy + Math.floor(i / 5), 'residential');
+        }
+        for (let i = 0; i < 5; i++) {
+            map.placeZone(cx + 5, cy + i, 'commercial');
+        }
+        for (let i = 0; i < 2; i++) {
+            map.placeZone(cx + 6, cy + i, 'industrial');
+        }
         
         const out = map.computeOutput(rs.vars);
-        // workers=10, commerce=5, production=2 (base output is 1 each)
-        assert.strictEqual(out.workers, 10);
-        assert.strictEqual(out.commerce, 5);
-        assert.strictEqual(out.production, 2);
+        // workers=10, commerce=5, production=2
+        assert.strictEqual(out.workers, 10, `Expected 10 workers, got ${out.workers}`);
+        assert.strictEqual(out.commerce, 5, `Expected 5 commerce, got ${out.commerce}`);
+        assert.strictEqual(out.production, 2, `Expected 2 production, got ${out.production}`);
         
         const minFactor = Math.min(out.workers, out.commerce, out.production);
         assert.strictEqual(minFactor, 2, 'Minimum output should be 2 (production)');

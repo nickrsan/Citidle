@@ -16,9 +16,9 @@ describe('Zoning Scaling Costs', () => {
     // Place a zone
     cy.get('#gameCanvas').click('center');
     
-    // Cost should increase. Initial 50, scale 1.05 -> floor(52.5) = 52
-    // Wait for the UI to update (usually immediate but let's be sure)
-    cy.get('#btn-residential').should('contain', '🏠 Residential ($52)');
+    // Cost should increase. Initial 50, scale 2 -> 50 * 2 = 100
+    // Wait for the UI to update
+    cy.get('#btn-residential').should('contain', '🏠 Residential ($100)');
   });
 
   it('respects research cost reduction', () => {

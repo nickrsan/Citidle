@@ -14,6 +14,9 @@ declare the task complete until you have generated all new tests,
 patched any existing tests as necessary, and run all tests to confirm
 that they pass.
 
+If tests do not pass and you think changes to a configuration file would fix the test,
+please ask me whether you should update the configuration file or update the test.
+
 Always place a summary of the completed work in the .junie/reports folder,
 as a markdown file with the word `summary` in the name and the date and time
 it was generated to distinguish it from other files (e.g. `summary_<date>_<time>.md`),

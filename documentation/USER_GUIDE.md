@@ -41,7 +41,8 @@ The city starts small, but you can purchase more land.
 
 ## Controls
 - **Pan**: Click and drag the map, or use **WASD** / **Arrow Keys**.
-- **Zoom**: Use your **Mouse Wheel** to zoom in and out.
+- **Zoom**: Use your **Mouse Wheel** to zoom in and out. The camera will zoom towards your cursor.
+- **Reset View**: Click the **🔍 Reset** button to return to default zoom and center your city.
 - **Select Zone**: Click the buttons at the bottom of the screen.
 - **Place Zone**: Click on an empty tile within the usable area.
 - **Panels**: Click **Research** or **Help** to toggle information panels.

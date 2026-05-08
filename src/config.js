@@ -19,7 +19,7 @@ export const ZONE_TYPES = {
         emoji: '🏪',
         baseColor: { h: 210, s: 55, l: 55 },   // blue
         placementCost: 75,
-        costScale: 3,
+        costScale: 2,
         baseOutput: { workers: 0, commerce: 1, production: 0 },
         spreadWeights: { commercial: 0.95, residential: 0.025, industrial: 0.025 },
     },
@@ -37,13 +37,13 @@ export const ZONE_TYPES = {
 
 // ── Grid settings ──
 export const GRID = {
-    width: 100,
-    height: 100,
+    width: 500,
+    height: 500,
     cellSize: 32,           // logical pixel size of one cell
-    initialUsableSize: 20,  // initial usable area (centered square)
+    initialUsableSize: 15,  // initial usable area (centered square)
     tileExpansionAmount: 5,  // cells to expand in each direction per purchase
-    tileBaseCost: 500,
-    tileCostScale: 1.8,
+    tileBaseCost: 1000000,
+    tileCostScale: 5,
 };
 
 // ── Isometric settings ──
@@ -92,12 +92,12 @@ export const RESEARCH_TREE = [
     {
         id: 'spread_rate2',
         name: 'Exurban Car Culture',
-        description: 'Increase zone spread chance by 10x per level.',
-        maxLevel: 3,
-        baseCost: 1500,
-        costScale: 100,
-        requires: {},
-        effects: [{ variable: 'spread_multiplier', operation: 'multiply', value: 10 }],
+        description: 'Increase zone spread chance by 5x per level.',
+        maxLevel: 6,
+        baseCost: 10000,
+        costScale: 500,
+        requires: {'spread_rate': 3},
+        effects: [{ variable: 'spread_multiplier', operation: 'multiply', value: 5 }],
         category: 'spread',
     },
 

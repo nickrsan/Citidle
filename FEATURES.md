@@ -29,7 +29,10 @@
 - **Neighbor Bonuses**: Specific research allows zones to densify faster when surrounded by zones of the same type.
 
 ## Map & UI
-- **Camera Controls**: Pan (mouse drag/WASD/arrows) and Zoom (scroll) functionality.
+- **Camera Controls**:
+  - Pan (mouse drag/WASD/arrows).
+  - Zoom (scroll) with smooth zoom-to-mouse cursor logic.
+  - Zoom Reset button to quickly return to default zoom and center the city.
 - **Usable Grid Area**: The game starts with a limited usable area (20x20) on a larger 100x100 grid.
 - **Grid Expansion**: Players can purchase tile expansions to increase the usable area of the map.
 - **Visual Feedback**:
