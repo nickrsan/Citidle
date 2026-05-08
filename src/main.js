@@ -426,8 +426,8 @@ function updateHUD() {
 
     dom.money.textContent = `💰 ${formatMoney(state.money)}`;
     dom.pop.textContent = `🏠 Pop: ${o.workers}`;
-    dom.workers.textContent = `🏭 Prod: ${o.production}`;
-    dom.commerce.textContent = `🏪 Comm: ${o.commerce}`;
+    dom.commerce.textContent = `🏪 Commercial Sales: ${o.commerce}`;
+    dom.workers.textContent = `🏭 Ind. Production: ${o.production}`;
     dom.output.textContent = `📊 Output: ${formatMoney(incomePerSec)}/s`;
     dom.tick.textContent = `⏱ Tick: ${tickMs}ms`;
 }
