@@ -2,7 +2,7 @@
 
 ## Core Gameplay
 - **Isometric City Building**: A grid-based city builder with an isometric perspective.
-- **Zone Types**: Three main zoning types that drive the economy:
+- **Zone Types**: Three main zoning types that drive the economy (all available from the start):
   - **Residential**: Provides workers.
   - **Commercial**: Sells goods produced by industry.
   - **Industrial**: Produces goods using workers.

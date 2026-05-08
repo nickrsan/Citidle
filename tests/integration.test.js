@@ -50,33 +50,26 @@ describe('Integration / UI Interaction consequences', () => {
         assert.strictEqual(map.placeZone(lockedX, lockedY, 'residential'), true, 'Should be able to place in newly unlocked zone');
     });
 
-    test('Researching unlocks allows placing new zone types', () => {
+    test('Zoning types are unlocked by default', () => {
         const rs = new ResearchSystem();
         const map = new GameMap();
         const cx = Math.floor(map.width / 2);
         const cy = Math.floor(map.height / 2);
 
-        // Commercial is locked initially (level 0)
-        assert.strictEqual(rs.getLevel('unlock_commercial'), 0);
-        // In the real UI, the button would be disabled based on rs.vars.unlock_commercial
-        assert.strictEqual(rs.vars.unlock_commercial, false);
-
-        // Purchase unlock
-        rs.purchase('unlock_commercial', 1000);
+        // All zoning types should be unlocked initially
+        assert.strictEqual(rs.vars.unlock_residential, true);
         assert.strictEqual(rs.vars.unlock_commercial, true);
+        assert.strictEqual(rs.vars.unlock_industrial, true);
         
-        // Now "placing" it works in the map (map doesn't check unlock_commercial, main.js does)
-        // But integration-wise, we've verified the variable changed correctly.
-        assert.strictEqual(map.placeZone(cx, cy, 'commercial'), true);
+        // Should be able to place all zone types immediately
+        assert.strictEqual(map.placeZone(cx, cy, 'residential'), true);
+        assert.strictEqual(map.placeZone(cx + 1, cy, 'commercial'), true);
+        assert.strictEqual(map.placeZone(cx + 2, cy, 'industrial'), true);
     });
 
     test('Income is determined by the minimum of workers, commerce, and production', () => {
         const rs = new ResearchSystem();
         const map = new GameMap();
-        
-        // Unlock all (assumes money is not an issue in tests if we pass large values)
-        rs.purchase('unlock_commercial', 10000);
-        rs.purchase('unlock_industrial', 10000);
         
         // Place 10 residential, 5 commercial, 2 industrial
         const cx = Math.floor(map.width / 2);

@@ -10,8 +10,6 @@ export class ResearchSystem {
         for (const item of RESEARCH_TREE) {
             this.levels[item.id] = 0;
         }
-        // Give residential unlock for free at start
-        this.levels['unlock_residential'] = 1;
 
         // Cached computed variables
         this.vars = { ...DEFAULT_VARS };
