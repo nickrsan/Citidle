@@ -221,6 +221,10 @@ body {
     cursor: not-allowed;
 }
 
+.research-item.unaffordable {
+    opacity: 0.6;
+}
+
 .research-item .ri-name {
     font-weight: 600;
     font-size: 14px;
@@ -238,6 +242,21 @@ body {
     color: #8cf;
 }
 
+.ri-progress-container {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    margin: 6px 0;
+    overflow: hidden;
+}
+
+.ri-progress-fill {
+    height: 100%;
+    background: #8cf;
+    transition: width 0.3s ease;
+}
+
 .research-item .ri-cost {
     font-size: 12px;
     color: #fc8;
@@ -248,6 +267,13 @@ body {
     font-size: 11px;
     color: #8f8;
     margin-top: 2px;
+}
+
+.research-item .ri-requires {
+    font-size: 11px;
+    color: #f88;
+    margin-top: 4px;
+    font-weight: 600;
 }
 
 /* Toast notifications */

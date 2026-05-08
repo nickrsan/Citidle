@@ -13,6 +13,10 @@
 
 ## Research & Progression
 - **Research Tree**: A graphical research tree with multi-level upgrades.
+- **Enhanced Research UI**:
+  - Visual feedback for unaffordable items (faded out).
+  - Progress bars for multi-level research items.
+  - Explicit prerequisite text on research items (e.g., "Requires Research Item Level X").
 - **Prerequisite System**: Research items can require other research to be completed first, visualized with connecting lines in the UI.
 - **Variable Modifiers**: Research can modify various game parameters:
   - Production/Efficiency bonuses.

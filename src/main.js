@@ -146,13 +146,34 @@ function renderResearchPanel() {
             if (maxed) cls += ' maxed';
             else if (!item.available) cls += ' locked';
             else if (affordable) cls += ' affordable';
+            else if (!maxed && item.available && state.money < item.nextCost) cls += ' unaffordable';
+
+            // Prerequisites text
+            let reqHtml = '';
+            if (!maxed && !research.canResearch(item.id) && Object.keys(item.requires).length > 0) {
+                const reqs = Object.entries(item.requires).map(([reqId, reqLevel]) => {
+                    const reqItem = research.getItem(reqId);
+                    return `Requires ${reqItem.name} Level ${reqLevel}`;
+                });
+                reqHtml = reqs.map(r => `<div class="ri-requires">${r}</div>`).join('');
+            }
+
+            // Progress bar
+            const progress = (item.currentLevel / item.maxLevel) * 100;
+            const progressBar = item.maxLevel > 1 ? `
+                <div class="ri-progress-container">
+                    <div class="ri-progress-fill" style="width: ${progress}%"></div>
+                </div>
+            ` : '';
 
             html += `<div class="${cls}" data-id="${item.id}">
                 <div class="ri-name">${item.name}</div>
                 <div class="ri-desc">${item.description}</div>
                 <div class="ri-level">Level ${item.currentLevel} / ${item.maxLevel}</div>
+                ${progressBar}
                 ${!maxed ? `<div class="ri-cost">Cost: ${formatMoney(item.nextCost)}</div>` : '<div class="ri-cost" style="color:#8f8">MAX</div>'}
                 ${item.effects.map(e => `<div class="ri-effect">${e.variable} ${e.operation} ${e.value}</div>`).join('')}
+                ${reqHtml}
             </div>`;
         }
     }
@@ -175,8 +196,33 @@ function renderResearchPanel() {
         });
     });
 
+    updateResearchPanel()
+
     // Draw prerequisite lines after DOM settles
     // requestAnimationFrame(() => drawResearchLines());
+}
+
+function updateResearchPanel() {
+    setTimeout(function(){ // make it re-render every 100ms so that as we get more money, the panel updates with available items
+        if (!dom.researchPanel.classList.contains('hidden')) {
+            updateResearchPanel();
+        }
+    }, 500);
+    // updates the research panel items with classes based on whether they're purchasable now
+    const grouped = research.getGrouped();
+    for (const [cat, items] of Object.entries(grouped)) {
+        for (const item of items) {
+            const maxed = item.currentLevel >= item.maxLevel;
+            const affordable = !maxed && item.available && state.money >= item.nextCost;
+            const el = document.querySelector(`.research-item[data-id="${item.id}"]`);
+            if (el) {
+                el.classList.toggle('affordable', affordable);
+                el.classList.toggle('unaffordable', !affordable);
+            }
+        }
+    }
+
+
 }
 
 function drawResearchLines() {

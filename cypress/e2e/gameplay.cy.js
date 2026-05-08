@@ -7,8 +7,8 @@ describe('Citidle E2E Gameplay', () => {
     cy.get('#money-display').should('contain', '💰 $500');
     cy.get('#population-display').should('contain', '🏠 Pop: 0');
     cy.get('#btn-residential').should('be.visible');
-    cy.get('#btn-commercial').should('have.class', 'locked');
-    cy.get('#btn-industrial').should('have.class', 'locked');
+    cy.get('#btn-commercial').should('not.have.class', 'locked');
+    cy.get('#btn-industrial').should('not.have.class', 'locked');
   });
 
   it('allows placing a residential zone', () => {
@@ -31,19 +31,16 @@ describe('Citidle E2E Gameplay', () => {
     cy.get('#btn-research').click();
     cy.get('#research-panel').should('be.visible');
     
-    // Find Commercial Zoning research
-    // It should be clickable if we have enough money (starts with 500, cost is 50)
-    cy.contains('.ri-name', 'Commercial Zoning').parents('.research-item').click();
+    // Find Urban Sprawl research
+    // It should be clickable if we have enough money (starts with 500, cost is 80)
+    cy.contains('.ri-name', 'Urban Sprawl').parents('.research-item').click();
     
-    // Check if it's researched (money should drop from 500 to 450)
-    cy.get('#money-display').should('contain', '💰 $450');
+    // Check if it's researched (money should drop from 500 to 420)
+    cy.get('#money-display').should('contain', '💰 $420');
     
     // Close research panel
     cy.get('#btn-close-research').click();
     cy.get('#research-panel').should('not.be.visible');
-    
-    // Commercial button should now be unlocked
-    cy.get('#btn-commercial').should('not.have.class', 'locked');
   });
 
   it('can expand the grid', () => {

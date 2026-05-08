@@ -45,12 +45,14 @@ The `ResearchManager` handles buying upgrades and applying their effects.
 ### Adding a Research Item
 To add a new research item, update `RESEARCH_TREE` in `src/config.js`. Ensure you specify:
 - `id`: Unique identifier.
-- `label`: Display name.
+- `name`: Display name.
 - `category`: Grouping for UI.
-- `cost`: Initial cost.
-- `costScale`: Multiplier for each level.
-- `effects`: Array of `{ op, var, value }` objects.
-- `prerequisites`: (Optional) Array of IDs.
+- `description`: Text shown in the research panel.
+- `cost`: Initial cost for level 1.
+- `costScale`: Multiplier for each subsequent level.
+- `maxLevel`: Maximum levels available for purchase.
+- `requires`: (Optional) Object mapping item IDs to required levels, e.g., `{ density_residential: 2 }`.
+- `effects`: Array of `{ variable, operation, value }` objects.
 
 ### Adding a Zone Type
 To add a new zone type, update `ZONE_TYPES` in `src/config.js`. You will also need to update `renderer.js` to define its visual representation and `grid.js` if it has unique economy contributions.

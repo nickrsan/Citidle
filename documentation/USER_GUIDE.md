@@ -26,9 +26,11 @@ The total money you earn per tick is the minimum of these three values, plus any
 
 ## Research
 Click the **Research** button to open the research tree.
-- Research costs money and provides permanent upgrades.
-- Some research items require others to be completed first (indicated by connecting lines).
-- Upgrades can increase efficiency, reduce costs, or unlock new mechanics like neighbor bonuses.
+- **Upgrades**: Research costs money and provides permanent upgrades.
+- **Affordability**: Items you currently cannot afford are slightly faded.
+- **Progress**: Many items have multiple levels. A progress bar on each item shows your current research progress for that upgrade.
+- **Prerequisites**: Some research items require others to be completed first (indicated by connecting lines and "Requires..." text on the item).
+- **Effects**: Upgrades can increase efficiency, reduce costs, or unlock new mechanics like neighbor bonuses.
 
 ## Expanding Your Map
 The city starts small, but you can purchase more land.
