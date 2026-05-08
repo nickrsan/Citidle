@@ -37,11 +37,11 @@ export const ZONE_TYPES = {
 
 // ── Grid settings ──
 export const GRID = {
-    width: 500,
-    height: 500,
+    width: 64,
+    height: 64,
     cellSize: 32,           // logical pixel size of one cell
-    initialUsableSize: 15,  // initial usable area (centered square)
-    tileExpansionAmount: 5,  // cells to expand in each direction per purchase
+    initialUsableSize: 16,  // initial usable area (centered square)
+    tileExpansionAmount: 8,  // cells to expand in each direction per purchase
     tileBaseCost: 1000000,
     tileCostScale: 5,
 };
