@@ -31,12 +31,12 @@ describe('Citidle E2E Gameplay', () => {
     cy.get('#btn-research').click();
     cy.get('#research-panel').should('be.visible');
     
-    // Find Urban Sprawl research
-    // It should be clickable if we have enough money (starts with 500, cost is 80)
-    cy.contains('.ri-name', 'Urban Sprawl').parents('.research-item').click();
+    // Find Trade Agreements research
+    // It should be clickable if we have enough money (starts with 500, cost is 200)
+    cy.contains('.ri-name', 'Trade Agreements').parents('.research-item').click();
     
-    // Check if it's researched (money should drop from 500 to 420)
-    cy.get('#money-display').should('contain', '💰 $420');
+    // Check if it's researched (money should drop from 500 to 300)
+    cy.get('#money-display').should('contain', '💰 $300');
     
     // Close research panel
     cy.get('#btn-close-research').click();

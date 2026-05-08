@@ -7,10 +7,11 @@ export const ZONE_TYPES = {
         // Base color (HSL) — hue, saturation %, lightness %
         baseColor: { h: 120, s: 45, l: 55 },   // green
         placementCost: 50,
+        costScale: 2,
         // Per-cell base output
         baseOutput: { workers: 1, commerce: 0, production: 0 },
         // Spread probabilities: when this zone spreads, what does neighbor become?
-        spreadWeights: { residential: 0.95, commercial: 0.03, industrial: 0.02 },
+        spreadWeights: { residential: 0.95, commercial: 0.04, industrial: 0.01 },
     },
     commercial: {
         id: 'commercial',
@@ -18,8 +19,9 @@ export const ZONE_TYPES = {
         emoji: '🏪',
         baseColor: { h: 210, s: 55, l: 55 },   // blue
         placementCost: 75,
+        costScale: 3,
         baseOutput: { workers: 0, commerce: 1, production: 0 },
-        spreadWeights: { commercial: 0.95, residential: 0.03, industrial: 0.02 },
+        spreadWeights: { commercial: 0.95, residential: 0.025, industrial: 0.025 },
     },
     industrial: {
         id: 'industrial',
@@ -27,8 +29,9 @@ export const ZONE_TYPES = {
         emoji: '🏭',
         baseColor: { h: 35, s: 60, l: 50 },    // orange/amber
         placementCost: 100,
+        costScale: 2,
         baseOutput: { workers: 0, commerce: 0, production: 1 },
-        spreadWeights: { industrial: 0.95, commercial: 0.03, residential: 0.02 },
+        spreadWeights: { industrial: 0.95, commercial: 0.04, residential: 0.01 },
     },
 };
 

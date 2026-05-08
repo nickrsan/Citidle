@@ -57,6 +57,24 @@ export class GameMap {
         this.tilePurchaseCount++;
     }
 
+    /** Get the count of zones of a specific type. */
+    getZoneCount(zoneType) {
+        let count = 0;
+        for (let i = 0; i < this.cells.length; i++) {
+            if (this.cells[i].zone === zoneType) count++;
+        }
+        return count;
+    }
+
+    /** Get the cost for the next zone placement. */
+    getZonePlacementCost(zoneType, researchVars = {}) {
+        const zt = ZONE_TYPES[zoneType];
+        if (!zt) return Infinity;
+        const count = this.getZoneCount(zoneType);
+        const multiplier = researchVars.placement_cost_multiplier || 1.0;
+        return Math.floor(zt.placementCost * Math.pow(zt.costScale, count) * multiplier);
+    }
+
     /** Get the cost for the next tile expansion. */
     getTileExpansionCost() {
         return Math.floor(GRID.tileBaseCost * Math.pow(GRID.tileCostScale, this.tilePurchaseCount));

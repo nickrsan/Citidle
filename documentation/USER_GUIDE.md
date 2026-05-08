@@ -12,7 +12,7 @@ You can place three types of zones on the map:
 - **Industrial (Yellow)**: Produces goods using workers from residential zones.
 
 ### How Zones Grow
-- **Placement**: Select a zone type from the bottom menu and click on a tile within the blue border to place it.
+- **Placement**: Select a zone type from the bottom menu and click on a tile within the blue border to place it. Each placement increases the cost of subsequent zones of that type.
 - **Spreading**: Once a zone is placed, it has a chance to spread to neighboring tiles automatically.
 - **Densification**: Zones will grow taller over time as more people move in or production increases. Taller zones are more efficient.
 
@@ -23,6 +23,8 @@ Your income is determined by the "Output" of your city. Output is limited by the
 - You need **Stores** (Commercial) to sell those **Goods**.
 
 The total money you earn per tick is the minimum of these three values, plus any direct income bonuses from research.
+
+Zoning costs increase as your city grows, so plan your initial seeds carefully!
 
 ## Research
 Click the **Research** button to open the research tree.

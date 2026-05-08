@@ -29,10 +29,10 @@ describe('ResearchSystem', () => {
         // efficiency_residential requires density_residential: 2
         assert.strictEqual(rs.canResearch('efficiency_residential'), false, 'Should not be able to research efficiency without density');
         
-        rs.purchase('density_residential', 1000);
+        rs.purchase('density_residential', 10000);
         assert.strictEqual(rs.canResearch('efficiency_residential'), false, 'Still need one more level of density');
         
-        rs.purchase('density_residential', 1000);
+        rs.purchase('density_residential', 10000);
         assert.strictEqual(rs.canResearch('efficiency_residential'), true, 'Should be able to research efficiency after level 2 density');
     });
 

@@ -30,7 +30,7 @@ describe('Research UI Improvements', () => {
     
     cy.get('#btn-research').click();
     
-    // Urban Sprawl cost 80, should be unaffordable
+    // Urban Sprawl cost 500, should be unaffordable when money is 0
     cy.contains('.ri-name', 'Urban Sprawl')
       .parents('.research-item')
       .should('have.class', 'unaffordable');
@@ -50,6 +50,6 @@ describe('Research UI Improvements', () => {
     
     cy.get('@item').find('.ri-progress-fill')
       .should('have.attr', 'style')
-      .and('contain', 'width: 10%'); // 1/10 * 100
+      .and('contain', 'width: 2%'); // 1/50 * 100
   });
 });

@@ -55,7 +55,10 @@ To add a new research item, update `RESEARCH_TREE` in `src/config.js`. Ensure yo
 - `effects`: Array of `{ variable, operation, value }` objects.
 
 ### Adding a Zone Type
-To add a new zone type, update `ZONE_TYPES` in `src/config.js`. You will also need to update `renderer.js` to define its visual representation and `grid.js` if it has unique economy contributions.
+To add a new zone type, update `ZONE_TYPES` in `src/config.js`. You will also need to specify:
+- `placementCost`: Base cost to place the first zone.
+- `costScale`: Exponential multiplier per existing zone of this type.
+You will also need to update `renderer.js` to define its visual representation and `grid.js` if it has unique economy contributions.
 
 ## Testing
 - Run unit tests: `npm test`

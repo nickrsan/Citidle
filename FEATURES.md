@@ -2,10 +2,11 @@
 
 ## Core Gameplay
 - **Isometric City Building**: A grid-based city builder with an isometric perspective.
-- **Zone Types**: Three main zoning types that drive the economy (all available from the start):
+- **Zoning Types**: Three main zoning types that drive the economy (all available from the start):
   - **Residential**: Provides workers.
   - **Commercial**: Sells goods produced by industry.
   - **Industrial**: Produces goods using workers.
+- **Scaling Placement Costs**: Zone placement costs scale based on the number of existing zones of that type, similar to research and expansion costs.
 - **Dynamic Spreading**: Zones have a probability to spread to neighboring cells (including diagonals) and a small chance to mutate into other zone types.
 - **Densification**: Zones automatically densify over time, increasing their capacity (population, jobs, or production). Visualized by taller buildings and deeper colors.
 - **Economy System**: A production loop where output is determined by the minimum of workers, commercial sales capacity, and industrial production.

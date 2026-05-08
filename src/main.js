@@ -68,7 +68,7 @@ function getTickMs() {
 }
 
 function getPlacementCost(zoneType) {
-    return Math.floor(ZONE_TYPES[zoneType].placementCost * research.vars.placement_cost_multiplier);
+    return map.getZonePlacementCost(zoneType, research.vars);
 }
 
 // ── Zone Placement Buttons ──
@@ -83,6 +83,9 @@ function updateZoneButtons() {
         btn.classList.toggle('locked', !unlocked);
         btn.classList.toggle('active', state.placingZone === type);
         const cost = getPlacementCost(type);
+        const emoji = ZONE_TYPES[type].emoji;
+        const label = ZONE_TYPES[type].label;
+        btn.textContent = `${emoji} ${label} (${formatMoney(cost)})`;
         btn.title = unlocked ? `Place ${type} zone (${formatMoney(cost)})` : 'Locked — research required';
     }
     updateTileButton();
@@ -365,6 +368,7 @@ function tryPlaceZone(gx, gy) {
         state.money -= cost;
         showToast(`✅ Placed ${state.placingZone} zone at (${gx}, ${gy})`);
         updateHUD();
+        updateZoneButtons();
     } else {
         showToast('❌ Cannot place there.');
     }
@@ -442,6 +446,7 @@ function gameLoop(timestamp) {
         // Update HUD every few ticks (not every frame)
         if (state.tickCount % 5 === 0) {
             updateHUD();
+            updateZoneButtons();
         }
     }
 
