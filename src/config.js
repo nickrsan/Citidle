@@ -210,7 +210,7 @@ export const RESEARCH_TREE = [
         id: 'cost_reduction',
         name: 'Community Meeting Facilitation',
         description: 'Reduce zone placement cost by 10% per level.',
-        maxLevel: 5,
+        maxLevel: 20,
         baseCost: 120,
         costScale: 5,
         requires: {},
