@@ -220,7 +220,7 @@ export class GameMap {
      * @returns {Array<{x: number, y: number, zone: string}>} — cells that densified this tick
      */
     tickDensify(vars = {}) {
-        const baseDensifyChance = 0.001; // per cell per tick
+        const baseDensifyChance = 0.0001; // per cell per tick
         const maxDensity = 10;
         const densified = [];
 
