@@ -494,8 +494,8 @@ function gameLoop(timestamp) {
         }
     }
 
-    // Render at ~60fps
-    if (timestamp - lastRenderTime >= 16) {
+    // Render at ~20fps because most things aren't changing much, but we don't want UI and mouse movements to feel laggy on the grid
+    if (timestamp - lastRenderTime >= 50) {
         renderer.render(map, state.placingZone);
         lastRenderTime = timestamp;
     }

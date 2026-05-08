@@ -55,7 +55,7 @@ export const ISO = {
 
 // ── Economy ──
 export const ECONOMY = {
-    baseTickMs: 200,         // starting tick interval
+    baseTickMs: 100,         // starting tick interval
     incomePerOutput: 1,      // $ per unit of min(workers, commerce, production)
     startingMoney: 500,
 };
