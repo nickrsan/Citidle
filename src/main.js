@@ -478,6 +478,7 @@ let lastRenderTime = 0;
 
 function gameLoop(timestamp) {
     requestAnimationFrame(gameLoop);
+    let isGameVisible = document.visibilityState === "visible";
 
     // Keyboard panning
     handleKeyPan();
@@ -488,14 +489,14 @@ function gameLoop(timestamp) {
         economyTick();
         lastTickTime = timestamp;
         // Update HUD every few ticks (not every frame)
-        if (state.tickCount % 5 === 0) {
+        if (isGameVisible && state.tickCount % 5 === 0) {
             updateHUD();
             updateZoneButtons();
         }
     }
 
     // Render at ~20fps because most things aren't changing much, but we don't want UI and mouse movements to feel laggy on the grid
-    if (timestamp - lastRenderTime >= 50) {
+    if (isGameVisible && timestamp - lastRenderTime >= 50) {
         renderer.render(map, state.placingZone);
         lastRenderTime = timestamp;
     }
