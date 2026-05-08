@@ -7,7 +7,7 @@ export const ZONE_TYPES = {
         // Base color (HSL) — hue, saturation %, lightness %
         baseColor: { h: 120, s: 45, l: 55 },   // green
         placementCost: 50,
-        costScale: 2,
+        costScale: 1.5,
         // Per-cell base output
         baseOutput: { workers: 1, commerce: 0, production: 0 },
         // Spread probabilities: when this zone spreads, what does neighbor become?
@@ -37,11 +37,11 @@ export const ZONE_TYPES = {
 
 // ── Grid settings ──
 export const GRID = {
-    width: 64,
-    height: 64,
+    width: 50,
+    height: 50,
     cellSize: 32,           // logical pixel size of one cell
-    initialUsableSize: 16,  // initial usable area (centered square)
-    tileExpansionAmount: 8,  // cells to expand in each direction per purchase
+    initialUsableSize: 10,  // initial usable area (centered square)
+    tileExpansionAmount: 5,  // cells to expand in each direction per purchase
     tileBaseCost: 1000000,
     tileCostScale: 5,
 };
@@ -55,7 +55,7 @@ export const ISO = {
 
 // ── Economy ──
 export const ECONOMY = {
-    baseTickMs: 100,         // starting tick interval
+    baseTickMs: 200,         // starting tick interval
     incomePerOutput: 1,      // $ per unit of min(workers, commerce, production)
     startingMoney: 500,
 };
@@ -250,7 +250,7 @@ export const DEFAULT_VARS = {
     unlock_residential: true,
     unlock_commercial: true,
     unlock_industrial: true,
-    spread_multiplier: 1.0,
+    spread_multiplier: 1.5,
     density_residential: 0,
     density_commercial: 0,
     density_industrial: 0,

@@ -463,8 +463,9 @@ function economyTick() {
     const output = map.computeOutput(vars);
     state.lastOutput = output;
 
-    // Income = min(workers, commerce, production) × income multiplier
-    const minOutput = Math.min(output.workers, output.commerce, output.production);
+    // Income = min(workers/2, commerce, production) × income multiplier
+    // workers/2 because they need to run the factory and the sales
+    const minOutput = Math.min(output.workers/2, output.commerce, output.production);
     const income = minOutput * ECONOMY.incomePerOutput * vars.income_multiplier;
     state.incomePerTick = income;
     state.money += income;
