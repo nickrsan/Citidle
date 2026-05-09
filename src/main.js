@@ -2,7 +2,7 @@ import { ISO, ECONOMY, ZONE_TYPES, GRID, ANIMATIONS, RESEARCH_TREE } from './con
 import { GameMap } from './grid.js';
 import { ResearchSystem } from './research.js';
 import { Renderer } from './renderer.js';
-import { saveGame, loadGame } from './saves.js';
+import { saveGame, loadGame, resetGame } from './saves.js';
 import * as config from "./config.js";
 
 // ── Game State ──
@@ -13,10 +13,11 @@ let state = {
     incomePerTick: 0,
     tickCount: 0,
 };
+const defaultState = JSON.parse(JSON.stringify(state));
 
 // ── Systems ──
-const map = new GameMap();
-const research = new ResearchSystem();
+let map = new GameMap();
+let research = new ResearchSystem();
 const canvas = document.getElementById('gameCanvas');
 const renderer = new Renderer(canvas);
 
@@ -37,6 +38,14 @@ function loadSave() {
 }
 
 loadSave();
+
+function fullResetGame() {
+    map = new GameMap();
+    research = new ResearchSystem();
+    state = JSON.parse(JSON.stringify(defaultState));
+    map.placeStartingZones();
+    updateResearchPanel();
+}
 
 function centerCamera() {
     const centerX = (map.usableMinX + map.usableMaxX + 1) / 2;
@@ -84,13 +93,15 @@ const dom = {
     helpPanel: document.getElementById('help-panel'),
     closeHelp: document.getElementById('btn-close-help'),
     toastContainer: document.getElementById('toast-container'),
+    resetButton: document.getElementById('btn-reset'),
 };
 
 // ── Helpers ──
 function formatMoney(n) {
+    if (n >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
     if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
     if (n >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
-    if (n >= 1e3) return `$${(n / 1e3).toFixed(1)}K`;
+    if (n >= 1e3) return `$${(n / 1e3).toFixed(2)}K`;
     return `$${Math.floor(n)}`;
 }
 
@@ -152,6 +163,7 @@ function selectZone(type) {
 dom.btnRes.addEventListener('click', () => selectZone('residential'));
 dom.btnCom.addEventListener('click', () => selectZone('commercial'));
 dom.btnInd.addEventListener('click', () => selectZone('industrial'));
+dom.resetButton.addEventListener('click', () => fullResetGame());
 
 // ── Tile Purchase ──
 dom.btnTiles.addEventListener('click', () => {

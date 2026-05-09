@@ -19,3 +19,9 @@ export function loadGame() {
     }
     return null;
 }
+
+export function resetGame() {
+    localStorage.removeItem('saveData');
+    window.location.reload();
+    navigator.reload();
+}
