@@ -15,6 +15,9 @@ let state = {
 };
 const defaultState = JSON.parse(JSON.stringify(state));
 
+let lastTickTime = 0;
+let lastRenderTime = 0;
+
 // ── Systems ──
 let map = new GameMap();
 let research = new ResearchSystem();
@@ -35,6 +38,9 @@ function loadSave() {
     state.lastOutput = savedData.gameState.lastOutput;
     state.incomePerTick = savedData.gameState.incomePerTick;
     state.placingZone = savedData.gameState.placingZone;
+
+    lastTickTime = savedData.lastTickTime ?? 0;
+    lastRenderTime = savedData.lastRenderTime ?? 0;
 }
 
 loadSave();
@@ -506,8 +512,6 @@ function economyTick() {
 }
 
 // ── Game Loop ──
-let lastTickTime = 0;
-let lastRenderTime = 0;
 
 function gameLoop(timestamp) {
     requestAnimationFrame(gameLoop);
@@ -537,7 +541,7 @@ function gameLoop(timestamp) {
         }
 
         if (isGameVisible && state.tickCount % 100 === 0) {
-            saveGame(state, map, research);
+            saveGame(state, map, research, lastTickTime, lastRenderTime);
         }
     }
 

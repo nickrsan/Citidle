@@ -1,12 +1,14 @@
 
-export function saveGame(gameState, gameMap, research) {
+export function saveGame(gameState, gameMap, research, lastTickTime, lastRenderTime) {
 
     let researchState = research.save()
     let gameMapState = gameMap.save()
     const saveData = {
         gameState,
         gameMapState,
-        researchState
+        researchState,
+        lastTickTime,
+        lastRenderTime,
     };
 
     localStorage.setItem('saveData', JSON.stringify(saveData));
