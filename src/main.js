@@ -516,6 +516,7 @@ function economyTick() {
 
 // ── Game Loop ──
 
+let missedTicks = 0
 function gameLoop(timestamp) {
     requestAnimationFrame(gameLoop);
     let isGameVisible = document.visibilityState === "visible";
@@ -525,23 +526,24 @@ function gameLoop(timestamp) {
 
     // Economy tick at configured interval
     const tickMs = getTickMs();
-    let missed_ticks = Math.floor((timestamp - lastTickTime) / tickMs);
-    if (offlineTicks > 0) {
-        // this formulation means we will speed forward, but should render intermediate frames and see expansion instead of just a larger place
-        let handleTicks = Math.min(100, offlineTicks);
-        offlineTicks -= handleTicks;
-        missed_ticks += handleTicks;
-    }
+    missedTicks = Math.floor((timestamp - lastTickTime) / tickMs);
+    missedTicks += offlineTicks;
+    offlineTicks = 0;
 
-    if (isGameVisible && missed_ticks > 0) {
-        if(missed_ticks > config.CATCHUP_SHOW_DIALOG_TICKS){  // if we missed a *lot* of ticks (tab in background), let the user know we're catching up
-            dom.catchupPanel.classList.remove('hidden');
-        }
-        for(let i = 0; i < missed_ticks; i++) {
+    // this formulation means we will speed forward, but should render intermediate frames and see expansion instead of just a larger place
+    let handleTicks = Math.min(100, missedTicks);
+    missedTicks -= handleTicks;
+
+
+    if (isGameVisible && handleTicks > 0) {
+        //if(missedTicks > config.CATCHUP_SHOW_DIALOG_TICKS){  // if we missed a *lot* of ticks (tab in background), let the user know we're catching up
+        //    dom.catchupPanel.classList.remove('hidden');
+        //}
+        for(let i = 0; i < handleTicks; i++) {
             // this loop ensures that if the tab gets backgrounded and doesn't run ticks, that we appropriately catch up
             economyTick();
         }
-        dom.catchupPanel.classList.add('hidden'); // add the hidden class back no matter what
+        //dom.catchupPanel.classList.add('hidden'); // add the hidden class back no matter what
 
         lastTickTime = timestamp;
         // Update HUD every few ticks (not every frame)
