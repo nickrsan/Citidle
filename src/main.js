@@ -489,7 +489,7 @@ function gameLoop(timestamp) {
         economyTick();
         lastTickTime = timestamp;
         // Update HUD every few ticks (not every frame)
-        if (isGameVisible && state.tickCount % 5 === 0) {
+        if (state.tickCount % 5 === 0) {
             updateHUD();
             updateZoneButtons();
         }
