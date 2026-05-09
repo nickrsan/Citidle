@@ -2,6 +2,7 @@ import { ISO, ECONOMY, ZONE_TYPES, GRID, ANIMATIONS, RESEARCH_TREE } from './con
 import { GameMap } from './grid.js';
 import { ResearchSystem } from './research.js';
 import { Renderer } from './renderer.js';
+import * as config from "./config.js";
 
 // ── Game State ──
 const state = {
@@ -57,6 +58,7 @@ const dom = {
     btnZoomReset: document.getElementById('btn-zoom-reset'),
     btnHelp: document.getElementById('btn-help'),
     researchPanel: document.getElementById('research-panel'),
+    catchupPanel: document.getElementById('catchup-panel'),
     researchContent: document.getElementById('research-content'),
     researchSvg: document.getElementById('research-svg'),
     closeResearch: document.getElementById('btn-close-research'),
@@ -485,8 +487,17 @@ function gameLoop(timestamp) {
 
     // Economy tick at configured interval
     const tickMs = getTickMs();
-    if (timestamp - lastTickTime >= tickMs) {
-        economyTick();
+    let missed_ticks = Math.floor((timestamp - lastTickTime) / tickMs);
+    if (isGameVisible && missed_ticks > 0) {
+        if(missed_ticks > config.CATCHUP_SHOW_DIALOG_TICKS){  // if we missed a *lot* of ticks (tab in background), let the user know we're catching up
+            dom.catchupPanel.classList.remove('hidden');
+        }
+        for(let i = 0; i < missed_ticks; i++) {
+            // this loop ensures that if the tab gets backgrounded and doesn't run ticks, that we appropriately catch up
+            economyTick();
+        }
+        dom.catchupPanel.classList.add('hidden'); // add the hidden class back no matter what
+
         lastTickTime = timestamp;
         // Update HUD every few ticks (not every frame)
         if (isGameVisible && state.tickCount % 5 === 0) {

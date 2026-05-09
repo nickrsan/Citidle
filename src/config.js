@@ -72,6 +72,8 @@ export const ANIMATIONS = {
     animationRiseSpeed: 30,       // pixels per second the animation floats up
 };
 
+export const CATCHUP_SHOW_DIALOG_TICKS = 1000;  // if we are behind by more than this many ticks, show catchup dialog
+
 // ── Research tree (JSON-style config) ──
 // Each item: id, name, description, maxLevel, baseCost, costScale,
 //   requires (prerequisite research ids with min level),
