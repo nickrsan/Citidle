@@ -527,8 +527,10 @@ function gameLoop(timestamp) {
     const tickMs = getTickMs();
     let missed_ticks = Math.floor((timestamp - lastTickTime) / tickMs);
     if (offlineTicks > 0) {
-        missed_ticks += offlineTicks;
-        offlineTicks = 0;
+        // this formulation means we will speed forward, but should render intermediate frames and see expansion instead of just a larger place
+        let handleTicks = Math.min(100, offlineTicks);
+        offlineTicks -= handleTicks;
+        missed_ticks += handleTicks;
     }
 
     if (isGameVisible && missed_ticks > 0) {
