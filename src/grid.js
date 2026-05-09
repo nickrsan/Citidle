@@ -41,6 +41,37 @@ export class GameMap {
         this.tilePurchaseCount = 0;
     }
 
+    placeStartingZones(){
+        const cx = Math.floor(this.width / 2);
+        const cy = Math.floor(this.height / 2);
+
+        this.placeZone(cx, cy, 'residential');
+        this.placeZone(cx-1, cy, 'residential');
+        this.placeZone(cx + 3, cy, 'commercial');
+        this.placeZone(cx - 3, cy + 3, 'industrial');
+
+    }
+
+    save(){
+        return {
+            "cells": this.cells,
+            "usableMinX": this.usableMinX,
+            "usableMinY": this.usableMinY,
+            "usableMaxX": this.usableMaxX,
+            "usableMaxY": this.usableMaxY,
+            "tilePurchaseCount": this.tilePurchaseCount
+        };
+    }
+
+    loadSave(data){
+        this.cells = data.cells;
+        this.usableMinX = data.usableMinX;
+        this.usableMinY = data.usableMinY;
+        this.usableMaxX = data.usableMaxX;
+        this.usableMaxY = data.usableMaxY;
+        this.tilePurchaseCount = data.tilePurchaseCount;
+    }
+
     /** Check if a cell is within the usable (unlocked) area. */
     isUsable(x, y) {
         return x >= this.usableMinX && x <= this.usableMaxX &&

@@ -46,6 +46,15 @@ export class ResearchSystem {
         return true;
     }
 
+    loadSave(saveState){
+        this.levels = saveState;
+        this._recompute();
+    }
+
+    save(){
+        return this.levels;
+    }
+
     /**
      * Purchase the next level of a research item.
      * @param {string} id

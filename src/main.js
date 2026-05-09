@@ -2,10 +2,11 @@ import { ISO, ECONOMY, ZONE_TYPES, GRID, ANIMATIONS, RESEARCH_TREE } from './con
 import { GameMap } from './grid.js';
 import { ResearchSystem } from './research.js';
 import { Renderer } from './renderer.js';
+import { saveGame, loadGame } from './saves.js';
 import * as config from "./config.js";
 
 // ── Game State ──
-const state = {
+let state = {
     money: ECONOMY.startingMoney,
     placingZone: null,          // null | 'residential' | 'commercial' | 'industrial'
     lastOutput: { workers: 0, commerce: 0, production: 0, counts: {} },
@@ -18,6 +19,24 @@ const map = new GameMap();
 const research = new ResearchSystem();
 const canvas = document.getElementById('gameCanvas');
 const renderer = new Renderer(canvas);
+
+function loadSave() {
+    const savedData = loadGame();
+    if (!savedData) {
+        map.placeStartingZones();
+        return;
+    }
+
+    map.loadSave(savedData.gameMapState);
+    research.loadSave(savedData.researchState);
+    state.money = savedData.gameState.money;
+    state.tickCount = savedData.gameState.tickCount;
+    state.lastOutput = savedData.gameState.lastOutput;
+    state.incomePerTick = savedData.gameState.incomePerTick;
+    state.placingZone = savedData.gameState.placingZone;
+}
+
+loadSave();
 
 function centerCamera() {
     const centerX = (map.usableMinX + map.usableMaxX + 1) / 2;
@@ -503,6 +522,10 @@ function gameLoop(timestamp) {
         if (isGameVisible && state.tickCount % 5 === 0) {
             updateHUD();
             updateZoneButtons();
+        }
+
+        if (isGameVisible && state.tickCount % 100 === 0) {
+            saveGame(state, map, research);
         }
     }
 
