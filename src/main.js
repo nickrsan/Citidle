@@ -23,6 +23,11 @@ let map = new GameMap();
 let research = new ResearchSystem();
 const canvas = document.getElementById('gameCanvas');
 const renderer = new Renderer(canvas);
+let offlineTicks = 0;
+
+function getTickMs() {
+    return Math.max(20, Math.floor(ECONOMY.baseTickMs * research.vars.tick_speed_multiplier));
+}
 
 function loadSave() {
     const savedData = loadGame();
@@ -39,8 +44,9 @@ function loadSave() {
     state.incomePerTick = savedData.gameState.incomePerTick;
     state.placingZone = savedData.gameState.placingZone;
 
-    lastTickTime = savedData.lastTickTime ?? 0;
-    lastRenderTime = savedData.lastRenderTime ?? 0;
+    let lastTickFullTimestamp = savedData.lastTickTime ?? 0
+
+    offlineTicks = (Date.now() - lastTickFullTimestamp) / getTickMs();
 }
 
 loadSave();
@@ -119,9 +125,6 @@ function showToast(msg) {
     setTimeout(() => el.remove(), 3000);
 }
 
-function getTickMs() {
-    return Math.max(20, Math.floor(ECONOMY.baseTickMs * research.vars.tick_speed_multiplier));
-}
 
 function getPlacementCost(zoneType) {
     return map.getZonePlacementCost(zoneType, research.vars);
@@ -523,6 +526,11 @@ function gameLoop(timestamp) {
     // Economy tick at configured interval
     const tickMs = getTickMs();
     let missed_ticks = Math.floor((timestamp - lastTickTime) / tickMs);
+    if (offlineTicks > 0) {
+        missed_ticks += offlineTicks;
+        offlineTicks = 0;
+    }
+
     if (isGameVisible && missed_ticks > 0) {
         if(missed_ticks > config.CATCHUP_SHOW_DIALOG_TICKS){  // if we missed a *lot* of ticks (tab in background), let the user know we're catching up
             dom.catchupPanel.classList.remove('hidden');
@@ -541,7 +549,8 @@ function gameLoop(timestamp) {
         }
 
         if (isGameVisible && state.tickCount % 100 === 0) {
-            saveGame(state, map, research, lastTickTime, lastRenderTime);
+            let saveTime = Date.now()
+            saveGame(state, map, research, saveTime, saveTime);
         }
     }
 
